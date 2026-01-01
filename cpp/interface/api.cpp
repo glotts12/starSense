@@ -7,20 +7,63 @@
 
 namespace starSense {
 
-BallisticSimOutput runBallisticSimulation(const BallisticSimParams &params) {
+// Build controller from params
+std::unique_ptr<Controller> makeController(
+    const std::string &controllerType) {
+    if (controllerType == "zero") {
+        return std::make_unique<ZeroController>();
+    } else {
+        throw std::invalid_argument(
+            "runSimulation: unsupported controllerType = " + controllerType);
+    }
+}
+
+// Build sensor from params
+std::unique_ptr<Sensor> makeSensor(const std::string &sensorType) {
+    if (sensorType == "ideal") {
+        return std::make_unique<IdealAttitudeSensor>();
+    } else {
+        throw std::invalid_argument(
+            "runSimulation: unsupported sensorType = " + sensorType
+        );
+    }
+}
+
+// Build actuator from params
+std::unique_ptr<Actuator> makeActuator(const std::string &actuatorType) {
+    if (actuatorType == "ideal") {
+        return std::make_unique<IdealTorqueActuator>();
+    } else {
+        throw std::invalid_argument(
+            "runSimulation: unsupported actuatorType = " + actuatorType
+        );
+    }
+}
+
+AttitudeSimOutput runSimulation(const AttitudeSimParams &params) {
     // Build dynamics
-    auto dynamics = std::make_unique<KinematicDynamics>();
+    auto dynamics = std::make_unique<RigidBodyDynamics>(params.inertiaBody);
 
     // Build integrator
-    IntegrationMethod method =
-        (params.integratorType == "euler") ? IntegrationMethod::Euler
-                                           : IntegrationMethod::RK4;
+    IntegrationMethod method;
+    if (params.integratorType == "euler") {
+        method = IntegrationMethod::Euler;
+    } else if (params.integratorType == "rk4") {
+        method = IntegrationMethod::RK4;
+    } else {
+        throw std::invalid_argument(
+            "runSimulation: unsupported integratorType = " + params.integratorType);
+    }
     auto integrator = std::make_unique<Integrator>(method);
 
-    // Zero controller, ideal sensor & actuator
-    auto controller = std::make_unique<ZeroController>();
-    auto sensor     = std::make_unique<IdealAttitudeSensor>();
-    auto actuator   = std::make_unique<IdealTorqueActuator>();
+    // Build controller
+    auto controller = makeController(params.controllerType);
+
+    // Build sensor
+    auto sensor = makeSensor(params.sensorType);
+
+    // Build actuator
+    auto actuator = makeActuator(params.actuatorType);
 
     // Reference: constant attitude equal to initial for now
     auto refProvider = [q0 = params.q0](double t) -> ReferenceProfile {
@@ -30,6 +73,7 @@ BallisticSimOutput runBallisticSimulation(const BallisticSimParams &params) {
         return ref;
     };
 
+    // Construct simulation object
     AttitudeSimulation sim(
         std::move(dynamics),
         std::move(integrator),
@@ -39,21 +83,25 @@ BallisticSimOutput runBallisticSimulation(const BallisticSimParams &params) {
         refProvider
     );
 
-    SimulationConfig cfg{0.0, params.dt, params.numSteps};
+    SimulationConfig cfg{params.t0, params.dt, params.numSteps};
     AttitudeState x0{params.q0, params.w0};
 
-    SimulationResult res = sim.run(cfg, x0);
+    // Run the simulation
+    SimulationResult simResult = sim.run(cfg, x0);
 
-    BallisticSimOutput out;
-    out.time.reserve(res.time.size());
-    out.quats.reserve(res.state.size());
-    out.omegas.reserve(res.state.size());
+    // Pack the output
+    AttitudeSimOutput out;
+    out.time            = simResult.time;
+    out.commandedTorque = simResult.commandedTorque;
+    out.appliedTorque   = simResult.appliedTorque;
 
-    for (std::size_t i = 0; i < res.state.size(); ++i) {
-        out.time.push_back(res.time[i]);
-        out.quats.push_back(res.state[i].q);
-        out.omegas.push_back(res.state[i].w);
+    out.quats.reserve(simResult.state.size());
+    out.omegas.reserve(simResult.state.size());
+    for (const auto &s : simResult.state) {
+        out.quats.push_back(s.q);
+        out.omegas.push_back(s.w);
     }
+
     return out;
 }
 

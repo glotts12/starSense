@@ -6,21 +6,48 @@
 
 namespace starSense {
 
-struct BallisticSimParams {
-    Quat q0;
-    Vec3 w0;
-    double dt;
-    int numSteps;
-    std::string integratorType; // "euler" or "rk4"
+struct AttitudeSimParams {
+    // Initial state
+    Quat q0;      // [w, x, y, z]
+    Vec3 w0;      // [wx, wy, wz] in body frame [rad/s]
+
+    // Spacecraft properties
+    Mat3 inertiaBody{  // full 3x3 inertia matrix in body frame - default unit cube
+        std::array<double,3>{1.0, 0.0, 0.0},
+        std::array<double,3>{0.0, 1.0, 0.0},
+        std::array<double,3>{0.0, 0.0, 1.0}
+    }; 
+
+    // Time setup
+    double t0 = 0;           // initial time [s]
+    double dt = 0.1;         // step [s]
+    int    numSteps = 1000;  // number of steps
+
+    // Integrator
+    std::string integratorType = "rk4";   // "euler" or "rk4"
+
+    // Controller selection
+    std::string controllerType = "zero";  // only "zero" is supported right now
+
+    // Sensor selection
+    std::string sensorType = "ideal";     // only "ideal" is supported right now
+
+    // Actuator selection
+    std::string actuatorType = "ideal";   // only "ideal" is supported right now
+
+    // Reference profile selection
+    std::string referenceType;            // not currently supported
 };
 
-struct BallisticSimOutput {
-    std::vector<double> time;
-    std::vector<Quat> quats;
-    std::vector<Vec3> omegas;
+struct AttitudeSimOutput {
+    std::vector<double> time;            // size N+1
+    std::vector<Quat>   quats;           // size N+1
+    std::vector<Vec3>   omegas;          // size N+1
+    std::vector<Vec3>   commandedTorque; // size N (per-step)
+    std::vector<Vec3>   appliedTorque;   // size N
 };
 
-// High-level function used by Python
-BallisticSimOutput runBallisticSimulation(const BallisticSimParams &params);
+// Single, general entrypoint
+AttitudeSimOutput runSimulation(const AttitudeSimParams &params);
 
 } // namespace starSense

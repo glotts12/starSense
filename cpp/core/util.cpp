@@ -52,6 +52,22 @@ Vec3 cross(const Vec3 &a, const Vec3 &b) {
     };
 }
 
+Vec3 add(const Vec3 &a, const Vec3 &b) {
+    return Vec3{
+        a[0] + b[0],
+        a[1] + b[1],
+        a[2] + b[2]
+    };
+}
+
+Vec3 sub(const Vec3 &a, const Vec3 &b) {
+    return Vec3{
+        a[0] - b[0],
+        a[1] - b[1],
+        a[2] - b[2]
+    };
+}
+
 // 3x3 matrix ops
 
 Mat3 transpose(const Mat3 &A) {
@@ -92,6 +108,36 @@ Vec3 matmul(const Vec3 &v, const Mat3 &A) {
         out[j] = v[0]*A[0][j] + v[1]*A[1][j] + v[2]*A[2][j];
     }
     return out;
+}
+
+Mat3 inverse(const Mat3 &A) {
+    // Compute determinant
+    double det =
+          A[0][0] * (A[1][1]*A[2][2] - A[1][2]*A[2][1])
+        - A[0][1] * (A[1][0]*A[2][2] - A[1][2]*A[2][0])
+        + A[0][2] * (A[1][0]*A[2][1] - A[1][1]*A[2][0]);
+
+    if (std::abs(det) < 1e-15) {
+        throw std::runtime_error("inverse(Mat3): matrix is singular (det ~ 0)");
+    }
+
+    double invDet = 1.0 / det;
+
+    Mat3 inv{};
+
+    inv[0][0] =  (A[1][1]*A[2][2] - A[1][2]*A[2][1]) * invDet;
+    inv[0][1] = -(A[0][1]*A[2][2] - A[0][2]*A[2][1]) * invDet;
+    inv[0][2] =  (A[0][1]*A[1][2] - A[0][2]*A[1][1]) * invDet;
+
+    inv[1][0] = -(A[1][0]*A[2][2] - A[1][2]*A[2][0]) * invDet;
+    inv[1][1] =  (A[0][0]*A[2][2] - A[0][2]*A[2][0]) * invDet;
+    inv[1][2] = -(A[0][0]*A[1][2] - A[0][2]*A[1][0]) * invDet;
+
+    inv[2][0] =  (A[1][0]*A[2][1] - A[1][1]*A[2][0]) * invDet;
+    inv[2][1] = -(A[0][0]*A[2][1] - A[0][1]*A[2][0]) * invDet;
+    inv[2][2] =  (A[0][0]*A[1][1] - A[0][1]*A[1][0]) * invDet;
+
+    return inv;
 }
 
 } // namespace starSense
