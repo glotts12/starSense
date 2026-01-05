@@ -1,8 +1,5 @@
 #include "util.hpp"
 
-#include <cmath>
-#include <algorithm>
-
 namespace starSense {
 
 // Vector normalization
@@ -138,6 +135,42 @@ Mat3 inverse(const Mat3 &A) {
     inv[2][2] =  (A[0][0]*A[1][1] - A[0][1]*A[1][0]) * invDet;
 
     return inv;
+}
+
+void validateInertia(const Mat3 &J,
+                     double symmetryTol,
+                     double posDefTol) {
+    // Symmetry check: J must equal J^T within symmetryTol
+    if (std::fabs(J[0][1] - J[1][0]) > symmetryTol ||
+        std::fabs(J[0][2] - J[2][0]) > symmetryTol ||
+        std::fabs(J[1][2] - J[2][1]) > symmetryTol) {
+
+        std::ostringstream oss;
+        oss << "Inertia matrix must be symmetric. Got:\n"
+            << "[" << J[0][0] << " " << J[0][1] << " " << J[0][2] << "; "
+            <<  J[1][0] << " " << J[1][1] << " " << J[1][2] << "; "
+            <<  J[2][0] << " " << J[2][1] << " " << J[2][2] << "]";
+        throw std::invalid_argument(oss.str());
+    }
+
+    // Leading principal minors (Sylvester's criterion for SPD)
+    const double m1 = J[0][0];
+
+    const double m2 = J[0][0] * J[1][1] - J[0][1] * J[1][0];
+
+    const double det =
+        J[0][0] * (J[1][1] * J[2][2] - J[1][2] * J[2][1]) -
+        J[0][1] * (J[1][0] * J[2][2] - J[1][2] * J[2][0]) +
+        J[0][2] * (J[1][0] * J[2][1] - J[1][1] * J[2][0]);
+
+    if (m1 <= posDefTol || m2 <= posDefTol || det <= posDefTol) {
+        std::ostringstream oss;
+        oss << "Inertia matrix must be symmetric positive definite. "
+            << "Leading minors: m1=" << m1
+            << ", m2=" << m2
+            << ", det=" << det;
+        throw std::invalid_argument(oss.str());
+    }
 }
 
 } // namespace starSense

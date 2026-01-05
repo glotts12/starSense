@@ -64,8 +64,8 @@ def plot_quaternion_components(result):
 
     Parameters
     ----------
-    result : BallisticSimOutput
-        Output from starSense.run_ballistic_simulation
+    result : AttitudeSimOutput
+        Output from starSense.run_simulation
         Must have result.time and result.quats (list of [w,x,y,z]).
     """
     t = np.array(result.time)
@@ -110,8 +110,8 @@ def plot_euler_angles(result):
 
     Parameters
     ----------
-    result : BallisticSimOutput
-        Output from starSense.run_ballistic_simulation
+    result : AttitudeSimOutput
+        Output from starSense.run_simulation
         Must have result.time and result.quats (list of [w,x,y,z]).
     """
     t = np.array(result.time)
@@ -154,8 +154,8 @@ def plot3d_orientation_animation(result):
 
     Parameters
     ----------
-    result : BallisticSimOutput
-        Output from starSense.run_ballistic_simulation
+    result : AttitudeSimOutput
+        Output from starSense.run_simulation
         Must have result.time and result.quats (list of [w,x,y,z]).
     """
     t = np.array(result.time)
@@ -301,4 +301,48 @@ def plot3d_orientation_animation(result):
     )
 
     fig.frames = frames
+    fig.show()
+
+
+# ---------------------------- #
+#   4. Rotational Kinetic Energy
+# ---------------------------- #
+def plot_rotational_kinetic_energy(result, inertia_body):
+    """
+    Plot rotational kinetic energy T = 0.5 * ωᵀ J ω over time.
+
+    Parameters
+    ----------
+    result : AttitudeSimOutput
+        Output from starSense.run_simulation.
+        Must have result.time and result.omegas (list of [wx, wy, wz]).
+
+    inertia_body : array-like, shape (3, 3)
+        Inertia matrix in the body frame (same J used in the dynamics).
+    """
+    t = np.array(result.time)
+    omegas = np.array(result.omegas)          # shape (N, 3)
+    J = np.array(inertia_body, dtype=float).reshape(3, 3)
+
+    # Rotational kinetic energy: T = 0.5 * ωᵀ J ω
+    J_omega = omegas @ J.T                    # (N, 3)
+    T = 0.5 * np.sum(omegas * J_omega, axis=1)
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=t,
+            y=T,
+            mode="lines",
+            name="<b>Rotational KE ⚡</b>",
+            line=dict(width=3, color="#00FFFF"),
+        )
+    )
+
+    fig = _apply_common_style(
+        fig,
+        "⚡ Rotational Kinetic Energy",
+        "⏱️ Time [s]",
+        "Energy [J] ⚡️",
+    )
     fig.show()

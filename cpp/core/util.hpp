@@ -1,6 +1,10 @@
 #pragma once
 
 #include <cstddef>
+#include <cmath>
+#include <algorithm>
+#include <sstream>
+
 #include "types.hpp"
 
 namespace starSense {
@@ -37,5 +41,10 @@ Vec3 matmul(const Vec3 &v, const Mat3 &A);
 
 // 3x3 inverse (throws if singular)
 Mat3 inverse(const Mat3 &A);
+
+// Validate that an inertia matrix is symmetric and postive definite
+void validateInertia(const Mat3 &J,
+                     double symmetryTol = 1e-10,
+                     double posDefTol   = 1e-12);
 
 } // namespace starSense
