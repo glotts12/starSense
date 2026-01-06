@@ -13,9 +13,4 @@ struct AttitudeState {
     Vec3 w;   // angular rate in body frame [rad/s]
 };
 
-struct ReferenceProfile {
-    Quat qRef;   // desired attitude
-    Vec3 wRef;   // desired body rate
-};
-
 } // namespace starSense

@@ -32,7 +32,7 @@ public:
         std::unique_ptr<Controller> controller,
         std::unique_ptr<Sensor> sensor,
         std::unique_ptr<Actuator> actuator,
-        std::function<ReferenceProfile(double)> referenceProvider
+        std::unique_ptr<ReferenceProfile> referenceProfile
     );
 
     SimulationResult run(
@@ -46,7 +46,7 @@ private:
     std::unique_ptr<Controller> controller_;
     std::unique_ptr<Sensor> sensor_;
     std::unique_ptr<Actuator> actuator_;
-    std::function<ReferenceProfile(double)> referenceProvider_;
+    std::unique_ptr<ReferenceProfile> referenceProfile_;
 };
 
 } // namespace starSense

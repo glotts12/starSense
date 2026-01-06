@@ -35,7 +35,6 @@ AttitudeState KinematicDynamics::computeDerivative(
 
 RigidBodyDynamics::RigidBodyDynamics(const Mat3 &inertiaBody)
     : J_(inertiaBody) { 
-    validateInertia(J_);
     Jinv_ = inverse(inertiaBody);
 }
 

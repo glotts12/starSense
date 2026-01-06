@@ -29,12 +29,14 @@ Vec3 PDController::computeCommandTorque(
     (void)t;
     (void)kpAtt_; // attitude gain not used yet
 
+    auto ref = reference.evaluate(t);
+
     Vec3 torque{0.0, 0.0, 0.0};
 
     // Simple rate-damping control:
     //   tau = -kd * (w - w_ref)
     for (std::size_t i = 0; i < 3; ++i) {
-        double rateErr = estimatedState.w[i] - reference.wRef[i];
+        double rateErr = estimatedState.w[i] - ref.wRef;
         torque[i] = -kdRate_ * rateErr;
     }
 

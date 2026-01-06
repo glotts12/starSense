@@ -8,7 +8,7 @@ from attitude_plotting import (
 
 # set up simulation parameters
 params = starSense.AttitudeSimParams()
-params.dt = 0.02
+params.dt = 0.1
 params.numSteps = 500
 params.q0 = [1.0, 0.0, 0.0, 0.0]
 params.inertiaBody = [
@@ -16,7 +16,7 @@ params.inertiaBody = [
     [0.0, 2.0, 0.0],
     [0.0, 0.0, 3.0], 
 ]
-params.w0 = [3.0, 10.0, 0.1] 
+params.w0 = [1.0, 0.5, 0.1] 
 
 # run simulation
 out = starSense.run_simulation(params)

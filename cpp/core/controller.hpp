@@ -1,6 +1,8 @@
 #pragma once
 
 #include "types.hpp"
+#include "util.hpp"
+#include "referenceProfile.hpp"
 
 namespace starSense {
 

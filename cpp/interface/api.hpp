@@ -1,8 +1,18 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <iostream>
+#include <cmath>
+
 #include "types.hpp"
 #include "simulation.hpp"
+#include "dynamics.hpp"
+#include "integrator.hpp"
+#include "sensor.hpp"
+#include "actuator.hpp"
+#include "controller.hpp"
+#include "util.hpp"
+#include "referenceProfile.hpp"
 
 namespace starSense {
 
@@ -36,7 +46,9 @@ struct AttitudeSimParams {
     std::string actuatorType = "ideal";   // only "ideal" is supported right now
 
     // Reference profile selection
-    std::string referenceType;            // not currently supported
+    std::string referenceType = "fixed";  // only fixed is supported right now
+    Quat qRef;
+    Vec3 wRef;
 };
 
 struct AttitudeSimOutput {
