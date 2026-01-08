@@ -6,11 +6,11 @@ namespace starSense {
 Vec3 ZeroController::computeCommandTorque(
     double t,
     const AttitudeState &estimatedState,
-    const ReferenceProfile &reference
+    const ReferenceState ref
 ) const {
     (void)t;
     (void)estimatedState;
-    (void)reference;
+    (void)ref;
 
     // No control: torque is identically zero
     return Vec3{0.0, 0.0, 0.0};
@@ -24,19 +24,17 @@ PDController::PDController(double kpAtt, double kdRate)
 Vec3 PDController::computeCommandTorque(
     double t,
     const AttitudeState &estimatedState,
-    const ReferenceProfile &reference
+    const ReferenceState ref
 ) const {
     (void)t;
     (void)kpAtt_; // attitude gain not used yet
-
-    auto ref = reference.evaluate(t);
 
     Vec3 torque{0.0, 0.0, 0.0};
 
     // Simple rate-damping control:
     //   tau = -kd * (w - w_ref)
     for (std::size_t i = 0; i < 3; ++i) {
-        double rateErr = estimatedState.w[i] - ref.wRef;
+        double rateErr = estimatedState.w[i] - ref.wRef[i];
         torque[i] = -kdRate_ * rateErr;
     }
 

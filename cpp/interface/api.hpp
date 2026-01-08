@@ -51,15 +51,7 @@ struct AttitudeSimParams {
     Vec3 wRef;
 };
 
-struct AttitudeSimOutput {
-    std::vector<double> time;            // size N+1
-    std::vector<Quat>   quats;           // size N+1
-    std::vector<Vec3>   omegas;          // size N+1
-    std::vector<Vec3>   commandedTorque; // size N (per-step)
-    std::vector<Vec3>   appliedTorque;   // size N
-};
-
 // Single, general entrypoint
-AttitudeSimOutput runSimulation(const AttitudeSimParams &params);
+SimulationResult runSimulation(const AttitudeSimParams &params);
 
 } // namespace starSense

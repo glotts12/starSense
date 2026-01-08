@@ -137,4 +137,21 @@ Mat3 inverse(const Mat3 &A) {
     return inv;
 }
 
+// Quaternion helpers
+Quat quatConjugate(const Quat &q) {
+    return Quat{ q[0], -q[1], -q[2], -q[3] };
+}
+
+Quat quatMultiply(const Quat &a, const Quat &b) {
+    const double aw = a[0], ax = a[1], ay = a[2], az = a[3];
+    const double bw = b[0], bx = b[1], by = b[2], bz = b[3];
+
+    return Quat{
+        aw*bw - ax*bx - ay*by - az*bz,
+        aw*bx + ax*bw + ay*bz - az*by,
+        aw*by - ax*bz + ay*bw + az*bx,
+        aw*bz + ax*by - ay*bx + az*bw
+    };
+}
+
 } // namespace starSense

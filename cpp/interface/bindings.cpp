@@ -22,13 +22,18 @@ PYBIND11_MODULE(starSense, m) {
         .def_readwrite("sensorType", &starSense::AttitudeSimParams::sensorType)
         .def_readwrite("actuatorType", &starSense::AttitudeSimParams::actuatorType);
 
-    // Simulation output
-    py::class_<starSense::AttitudeSimOutput>(m, "AttitudeSimOutput")
-        .def_readonly("time", &starSense::AttitudeSimOutput::time)
-        .def_readonly("quats", &starSense::AttitudeSimOutput::quats)
-        .def_readonly("omegas", &starSense::AttitudeSimOutput::omegas)
-        .def_readonly("commandedTorque", &starSense::AttitudeSimOutput::commandedTorque)
-        .def_readonly("appliedTorque", &starSense::AttitudeSimOutput::appliedTorque);
+    // Simulation Result
+    py::class_<starSense::SimulationResult>(m, "SimulationResult")
+        .def_readonly("time",            &starSense::SimulationResult::time)
+        .def_readonly("quats",           &starSense::SimulationResult::quats)
+        .def_readonly("omegas",          &starSense::SimulationResult::omegas)
+        .def_readonly("commandedTorque", &starSense::SimulationResult::commandedTorque)
+        .def_readonly("appliedTorque",   &starSense::SimulationResult::appliedTorque)
+        // new fields, optional for Python users:
+        .def_readonly("qRef",            &starSense::SimulationResult::qRef)
+        .def_readonly("wRef",            &starSense::SimulationResult::wRef)
+        .def_readonly("attitudeError",   &starSense::SimulationResult::attitudeError)
+        .def_readonly("rateError",       &starSense::SimulationResult::rateError);
 
     // Main entrypoint
     m.def(

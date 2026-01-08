@@ -113,7 +113,7 @@ std::unique_ptr<ReferenceProfile> makeReferenceProfile(
     }
 }
 
-AttitudeSimOutput runSimulation(const AttitudeSimParams &params) {
+SimulationResult runSimulation(const AttitudeSimParams &params) {
     // Validate inputs
     validateInertia(params.inertiaBody);
     validateTimestep(params);  // NOTE: In the future switch to an adaptive step integrator
@@ -161,20 +161,7 @@ AttitudeSimOutput runSimulation(const AttitudeSimParams &params) {
     // Run the simulation
     SimulationResult simResult = sim.run(cfg, x0);
 
-    // Pack the output
-    AttitudeSimOutput out;
-    out.time            = simResult.time;
-    out.commandedTorque = simResult.commandedTorque;
-    out.appliedTorque   = simResult.appliedTorque;
-
-    out.quats.reserve(simResult.state.size());
-    out.omegas.reserve(simResult.state.size());
-    for (const auto &s : simResult.state) {
-        out.quats.push_back(s.q);
-        out.omegas.push_back(s.w);
-    }
-
-    return out;
+    return simResult;
 }
 
 } // namespace starSense

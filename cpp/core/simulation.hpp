@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+
 #include "types.hpp"
 #include "dynamics.hpp"
 #include "integrator.hpp"
@@ -18,10 +19,17 @@ struct SimulationConfig {
 };
 
 struct SimulationResult {
-    std::vector<double> time;          // size N+1
-    std::vector<AttitudeState> state;  // size N+1
-    std::vector<Vec3> commandedTorque; // size N
-    std::vector<Vec3> appliedTorque;   // size N
+    std::vector<double> time;            // size N+1
+    std::vector<Quat>   quats;           // size N+1
+    std::vector<Vec3>   omegas;          // size N+1
+    std::vector<Vec3>   commandedTorque; // size N
+    std::vector<Vec3>   appliedTorque;   // size N
+
+    // reference & error logs (size N+1)
+    std::vector<Quat> qRef;
+    std::vector<Vec3> wRef;
+    std::vector<Vec3> attitudeError;   // 3-vector rotation error in body
+    std::vector<Vec3> rateError;       // ω − ω_ref in body
 };
 
 class AttitudeSimulation {

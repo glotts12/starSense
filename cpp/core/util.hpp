@@ -42,4 +42,10 @@ Vec3 matmul(const Vec3 &v, const Mat3 &A);
 // 3x3 inverse (throws if singular)
 Mat3 inverse(const Mat3 &A);
 
+// ------------------------------
+// Quaternion helpers
+// ------------------------------
+Quat quatConjugate(const Quat &q);
+Quat quatMultiply(const Quat &a, const Quat &b);
+
 } // namespace starSense

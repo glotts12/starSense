@@ -1,6 +1,5 @@
 #pragma once
 
-#include "types.hpp"
 #include "util.hpp"
 #include "referenceProfile.hpp"
 
@@ -18,7 +17,7 @@ public:
     virtual Vec3 computeCommandTorque(
         double t,
         const AttitudeState &estimatedState,
-        const ReferenceProfile &reference
+        const ReferenceState ref
     ) const = 0;
 };
 
@@ -29,7 +28,7 @@ public:
     Vec3 computeCommandTorque(
         double t,
         const AttitudeState &estimatedState,
-        const ReferenceProfile &reference
+        const ReferenceState ref
     ) const override;
 };
 
@@ -42,7 +41,7 @@ public:
     Vec3 computeCommandTorque(
         double t,
         const AttitudeState &estimatedState,
-        const ReferenceProfile &reference
+        const ReferenceState ref
     ) const override;
 
 private:

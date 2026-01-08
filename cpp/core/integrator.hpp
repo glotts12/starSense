@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <functional>
+
 #include "types.hpp"
 #include "dynamics.hpp"
 #include "util.hpp"

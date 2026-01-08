@@ -1,3 +1,5 @@
+#pragma once
+
 #include "types.hpp"
 
 namespace starSense {
@@ -12,7 +14,7 @@ public:
     virtual ~ReferenceProfile() = default;
 
     // Baseline signature; we can later add more info if needed
-    virtual ReferenceState evaluate(double t) const = 0;
+    virtual ReferenceState computeReferenceState(double t) const = 0;
 };
 
 class ConstantReferenceProfile : public ReferenceProfile {
@@ -20,7 +22,7 @@ public:
     ConstantReferenceProfile(const Quat& qRef0, const Vec3& wRef0)
         : qRef0_(qRef0), wRef0_(wRef0) {}
 
-    ReferenceState evaluate(double /*t*/) const override {
+    ReferenceState computeReferenceState(double /*t*/) const override {
         return ReferenceState{qRef0_, wRef0_};
     }
 

@@ -64,7 +64,7 @@ def plot_quaternion_components(result):
 
     Parameters
     ----------
-    result : AttitudeSimOutput
+    result : SimulationResult
         Output from starSense.run_simulation
         Must have result.time and result.quats (list of [w,x,y,z]).
     """
@@ -110,7 +110,7 @@ def plot_euler_angles(result):
 
     Parameters
     ----------
-    result : AttitudeSimOutput
+    result : SimulationResult
         Output from starSense.run_simulation
         Must have result.time and result.quats (list of [w,x,y,z]).
     """
@@ -154,7 +154,7 @@ def plot3d_orientation_animation(result):
 
     Parameters
     ----------
-    result : AttitudeSimOutput
+    result : SimulationResult
         Output from starSense.run_simulation
         Must have result.time and result.quats (list of [w,x,y,z]).
     """
@@ -313,7 +313,7 @@ def plot_rotational_kinetic_energy(result, inertia_body):
 
     Parameters
     ----------
-    result : AttitudeSimOutput
+    result : SimulationResult
         Output from starSense.run_simulation.
         Must have result.time and result.omegas (list of [wx, wy, wz]).
 
