@@ -18,6 +18,8 @@ PYBIND11_MODULE(starSense, m) {
         .def_readwrite("numSteps", &starSense::AttitudeSimParams::numSteps)
         .def_readwrite("integratorType", &starSense::AttitudeSimParams::integratorType)
         .def_readwrite("controllerType", &starSense::AttitudeSimParams::controllerType)
+        .def_readwrite("wRef", &starSense::AttitudeSimParams::wRef)
+        .def_readwrite("qRef", &starSense::AttitudeSimParams::qRef)
         .def_readwrite("referenceType", &starSense::AttitudeSimParams::referenceType)
         .def_readwrite("sensorType", &starSense::AttitudeSimParams::sensorType)
         .def_readwrite("actuatorType", &starSense::AttitudeSimParams::actuatorType);

@@ -346,3 +346,140 @@ def plot_rotational_kinetic_energy(result, inertia_body):
         "Energy [J] ⚡️",
     )
     fig.show()
+
+
+# ---------------------------------------------------------
+# Control error plots
+# ---------------------------------------------------------
+def plot_attitude_error_components(result):
+    """
+    Plot attitude error components e_att(t) vs time.
+
+    e_att is the 3-vector rotation error (in radians) computed in C++.
+    """
+    t = np.array(result.time)
+    e_att = np.array(result.attitudeError)  # shape (N+1, 3)
+
+    ex = e_att[:, 0]
+    ey = e_att[:, 1]
+    ez = e_att[:, 2]
+
+    labels = ["eₓ 😵‍💫", "eᵧ 🤯", "e_z 🌀"]
+    colors = ["#FF5555", "#55FF55", "#5599FF"]
+    data = [ex, ey, ez]
+
+    fig = go.Figure()
+    for d, label, color in zip(data, labels, colors):
+        fig.add_trace(
+            go.Scatter(
+                x=t,
+                y=d,
+                mode="lines",
+                name=f"<b>{label}</b>",
+                line=dict(width=3, color=color),
+            )
+        )
+
+    fig = _apply_common_style(
+        fig,
+        "🎯 Attitude Error Components",
+        "⏱️ Time [s]",
+        "Error [rad] 🧮",
+    )
+    fig.show()
+
+
+def plot_attitude_error_norm(result):
+    """
+    Plot norm of attitude error vs time.
+
+    Norm of e_att is the small-angle approximation of total rotation error.
+    Converted to degrees for sanity.
+    """
+    t = np.array(result.time)
+    e_att = np.array(result.attitudeError)  # (N+1, 3)
+    e_norm_rad = np.linalg.norm(e_att, axis=1)
+    e_norm_deg = np.rad2deg(e_norm_rad)
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=t,
+            y=e_norm_deg,
+            mode="lines",
+            name="<b>‖e_att‖</b>",
+            line=dict(width=3, color="#FF00FF"),
+        )
+    )
+
+    fig = _apply_common_style(
+        fig,
+        "🎯 Attitude Error Norm",
+        "⏱️ Time [s]",
+        "‖e_att‖ [deg] 📐",
+    )
+    fig.show()
+
+
+def plot_rate_error_components(result):
+    """
+    Plot angular rate error components e_ω(t) = ω - ω_ref vs time.
+    """
+    t = np.array(result.time)
+    e_rate = np.array(result.rateError)  # (N+1, 3)
+
+    ew_x = e_rate[:, 0]
+    ew_y = e_rate[:, 1]
+    ew_z = e_rate[:, 2]
+
+    labels = ["e_ωₓ 🔻", "e_ωᵧ 🔺", "e_ω_z 🔁"]
+    colors = ["#00FFFF", "#00FF88", "#FF8800"]
+    data = [ew_x, ew_y, ew_z]
+
+    fig = go.Figure()
+    for d, label, color in zip(data, labels, colors):
+        fig.add_trace(
+            go.Scatter(
+                x=t,
+                y=d,
+                mode="lines",
+                name=f"<b>{label}</b>",
+                line=dict(width=3, color=color),
+            )
+        )
+
+    fig = _apply_common_style(
+        fig,
+        "⚙️ Rate Error Components",
+        "⏱️ Time [s]",
+        "e_ω [rad/s] 🧮",
+    )
+    fig.show()
+
+
+def plot_rate_error_norm(result):
+    """
+    Plot norm of angular rate error vs time.
+    """
+    t = np.array(result.time)
+    e_rate = np.array(result.rateError)  # (N+1, 3)
+    e_norm = np.linalg.norm(e_rate, axis=1)
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=t,
+            y=e_norm,
+            mode="lines",
+            name="<b>‖e_ω‖</b>",
+            line=dict(width=3, color="#00FFCC"),
+        )
+    )
+
+    fig = _apply_common_style(
+        fig,
+        "⚙️ Rate Error Norm",
+        "⏱️ Time [s]",
+        "‖e_ω‖ [rad/s] 📉",
+    )
+    fig.show()
