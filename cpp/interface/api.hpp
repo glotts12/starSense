@@ -29,7 +29,6 @@ struct AttitudeSimParams {
     }; 
 
     // Time setup
-    double t0 = 0;           // initial time [s]
     double dt = 0.1;         // step [s]
     int    numSteps = 1000;  // number of steps
 
@@ -37,7 +36,10 @@ struct AttitudeSimParams {
     std::string integratorType = "rk4";   // "euler" or "rk4"
 
     // Controller selection
-    std::string controllerType = "zero";  // only "zero" is supported right now
+    std::string controllerType = "zero";                // "zero" and "pd" supported
+    Vec3 kpAtt = std::array<double,3>{1.0, 1.0, 1.0};   // defaults
+    Vec3 kdRate = std::array<double,3>{1.0, 1.0, 1.0};  // defaults
+    double controlRateHz = dt;
 
     // Sensor selection
     std::string sensorType = "ideal";     // only "ideal" is supported right now

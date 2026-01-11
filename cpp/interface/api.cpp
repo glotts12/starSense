@@ -67,9 +67,11 @@ void validateTimestep(const AttitudeSimParams& params) {
 
 // Build controller from params
 std::unique_ptr<Controller> makeController(
-    const std::string &controllerType) {
+    const std::string &controllerType, Vec3 kpAtt, Vec3 kdRate, double controlRateHz) {
     if (controllerType == "zero") {
         return std::make_unique<ZeroController>();
+    } else if (controllerType == "pd") {
+        return std::make_unique<PDController>(kpAtt, kdRate, controlRateHz);
     } else {
         throw std::invalid_argument(
             "runSimulation: unsupported controllerType = " + controllerType);
@@ -134,7 +136,7 @@ SimulationResult runSimulation(const AttitudeSimParams &params) {
     auto integrator = std::make_unique<Integrator>(method);
 
     // Build controller
-    auto controller = makeController(params.controllerType);
+    auto controller = makeController(params.controllerType, params.kpAtt, params.kdRate, params.controlRateHz);
 
     // Build sensor
     auto sensor = makeSensor(params.sensorType);
@@ -155,7 +157,7 @@ SimulationResult runSimulation(const AttitudeSimParams &params) {
         std::move(refProvider)
     );
 
-    SimulationConfig cfg{params.t0, params.dt, params.numSteps};
+    SimulationConfig cfg{params.dt, params.numSteps};
     AttitudeState x0{params.q0, params.w0};
 
     // Run the simulation

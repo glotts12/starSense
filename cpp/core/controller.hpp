@@ -22,7 +22,7 @@ public:
 };
 
 
-// Release 1: Zero controller
+// Zero controller
 class ZeroController : public Controller {
 public:
     Vec3 computeCommandTorque(
@@ -33,10 +33,10 @@ public:
 };
 
 
-// PD controller placeholder (rate-only for now)
+// PD controller
 class PDController : public Controller {
 public:
-    PDController(double kpAtt, double kdRate);
+    PDController(Vec3 kpAtt, Vec3 kdRate, double controlRateHz);
 
     Vec3 computeCommandTorque(
         double t,
@@ -45,8 +45,10 @@ public:
     ) const override;
 
 private:
-    double kpAtt_;   // attitude gain (unused for now)
-    double kdRate_;  // rate damping gain
+    Vec3 kpAtt_;                              // attitude gain
+    Vec3 kdRate_;                             // rate damping gain
+    double controlRateHz_;                    // how often to update control command
+    mutable double nextUpdateTime_ = 0.0;     // next time to refresh torque
+    mutable Vec3 lastTorque_{0.0, 0.0, 0.0};  // held command between updates};
 };
-
 } // namespace starSense

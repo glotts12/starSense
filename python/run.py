@@ -13,19 +13,27 @@ from attitude_plotting import (
 # set up simulation parameters
 params = starSense.AttitudeSimParams()
 params.dt = 0.01
-params.numSteps = 5000
-params.q0 = [1.0, 0.0, 0.0, 0.0]
+params.numSteps = 3000
+
+# spacecraft parameters
+params.q0 = [1.0, 0.2, 2.0, 5.0]
+params.w0 = [0.8, 1.3, 2.1] 
 params.inertiaBody = [
     [1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
     [0.0, 0.0, 1.0], 
 ]
-params.w0 = [1.0, 0.0, 0.0] 
 
 # constant reference profile
 params.referenceType = 'fixed'
-params.wRef = [1.0, 0.0, 0.0] 
+params.wRef = [0.0, 0.0, 0.0] 
 params.qRef = [1.0, 0.0, 0.0, 0.0]
+
+# control parameters
+params.controllerType = 'pd'
+params.kpAtt  = [0.25, 0.25, 0.25]
+params.kdRate = [0.7,  0.7,  0.7]
+params.controlRateHz = 1
 
 # run simulation
 out = starSense.run_simulation(params)

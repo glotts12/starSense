@@ -24,7 +24,7 @@ SimulationResult AttitudeSimulation::run(
 ) const {
     SimulationResult result;
     const int nSteps = cfg.numSteps;    
-    const double t0 = cfg.t0;
+    const double t0 = 0;  // always start from t = 0
     const double dt = cfg.dt;
 
     // Reserve memory
@@ -43,7 +43,7 @@ SimulationResult AttitudeSimulation::run(
 
         // estimated state = true state but with measured attitude
         AttitudeState estimatedState = x;
-        estimatedState.q = qMeas;
+        estimatedState.q = qMeas;  // QUESTION: (for later) Why are we not measuring omega too?
 
         // 2. reference state (desired attitude / rate at time t)
         ReferenceState ref = referenceProfile_->computeReferenceState(t);

@@ -13,7 +13,6 @@
 namespace starSense {
 
 struct SimulationConfig {
-    double t0;
     double dt;
     int numSteps;
 };
