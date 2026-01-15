@@ -39,10 +39,10 @@ Current capabilities:
     - Gains `K` generated in Python from user-supplied Q/R weights and inertia
     - Same sample-and-hold infrastructure as PD
 
-- **Sensors & actuators (ideal for now)**
+- **Sensors & actuators**
   - Ideal attitude “sensor” (no noise or bias yet)
   - Ideal actuator (commanded torque = applied torque)
-  - Sensor + Noise uncertainty coming soon ...
+  - Sensor/Actuator + Noise and uncertainty coming soon ...
 
 - **Space environment modeling**
   - Coming soon ... 
@@ -119,13 +119,10 @@ cmake --build .
 cd ..
 ```
 
-This produces a shared module:
-
+This produces a shared module which can be imported directly by Python:
 ```
 build/starSense.so
 ```
-
-which can be imported directly by Python.
 
 ---
 
@@ -134,7 +131,6 @@ which can be imported directly by Python.
 From the **repo root**:
 
 ```bash
-source .venv/bin/activate   # ensure you're in the same venv
 PYTHONPATH=build python python/run_pd_controls.py
 ```
 
@@ -154,8 +150,6 @@ PYTHONPATH=build python python/run_lqr_controls.py
 - `state` – internal state objects (quaternions + angular rates)
 - `quats` – quaternion history `[w, x, y, z]`
 - `omegas` – angular velocity history in the body frame
-- `commandedTorque` – controller output torque (N samples)
-- `appliedTorque` – actuator output torque (N samples)
 - `qRef`, `wRef` – reference attitude and rate histories
 - `attitudeError` – attitude error vector in the body frame
 - `rateError` – angular rate error in the body frame
@@ -163,9 +157,7 @@ PYTHONPATH=build python python/run_lqr_controls.py
 The module `python/attitude_plotting.py` provides Plotly utilities for:
 
 - Quaternion time histories
-- Euler angles (roll, pitch, yaw)
+- Euler angles time histories (roll, pitch, yaw)
 - 3D attitude animation
-- Animated body axes
 - Rotational kinetic energy vs time
-- Attitude and rate error diagnostics
-- Commanded vs applied torque comparisons
+- Attitude and rate error vs time
