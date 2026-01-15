@@ -51,4 +51,23 @@ private:
     mutable double nextUpdateTime_ = 0.0;     // next time to refresh torque
     mutable Vec3 lastTorque_{0.0, 0.0, 0.0};  // held command between updates};
 };
+
+// Linear Quadratic Regulator (LQR) controller
+class LQRController : public Controller {
+public:
+    LQRController(const Mat3x6 &K, double controlRateHz);
+
+    Vec3 computeCommandTorque(
+        double t,
+        const AttitudeState &estimatedState,
+        const ReferenceState ref
+    ) const override;
+
+private:
+    Mat3x6 K_;                                // 3x6 gain matrix passes in from Python
+    double controlRateHz_;                    // how often to update control command
+    mutable double nextUpdateTime_ = 0.0;     // next time to refresh torque
+    mutable Vec3 lastTorque_{0.0, 0.0, 0.0};  // held command between updates};
+};
+
 } // namespace starSense

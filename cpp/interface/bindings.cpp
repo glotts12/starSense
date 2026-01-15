@@ -19,6 +19,7 @@ PYBIND11_MODULE(starSense, m) {
         .def_readwrite("controllerType", &starSense::AttitudeSimParams::controllerType)
         .def_readwrite("kpAtt", &starSense::AttitudeSimParams::kpAtt)
         .def_readwrite("kdRate", &starSense::AttitudeSimParams::kdRate)
+        .def_readwrite("kLqr", &starSense::AttitudeSimParams::kLqr)
         .def_readwrite("controlRateHz", &starSense::AttitudeSimParams::controlRateHz)
         .def_readwrite("wRef", &starSense::AttitudeSimParams::wRef)
         .def_readwrite("qRef", &starSense::AttitudeSimParams::qRef)

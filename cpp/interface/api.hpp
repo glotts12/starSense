@@ -36,9 +36,14 @@ struct AttitudeSimParams {
     std::string integratorType = "rk4";   // "euler" or "rk4"
 
     // Controller selection
-    std::string controllerType = "zero";                // "zero" and "pd" supported
+    std::string controllerType = "zero";                // "zero", "pd", and "lqr" supported
     Vec3 kpAtt = std::array<double,3>{1.0, 1.0, 1.0};   // defaults
     Vec3 kdRate = std::array<double,3>{1.0, 1.0, 1.0};  // defaults
+    Mat3x6 kLqr = {{                                    // defaults
+        {{1.0, 1.0, 1.0, 1.0, 1.0, 1.0}},
+        {{1.0, 1.0, 1.0, 1.0, 1.0, 1.0}},
+        {{1.0, 1.0, 1.0, 1.0, 1.0, 1.0}}
+    }};
     double controlRateHz = dt;
 
     // Sensor selection

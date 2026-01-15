@@ -1,8 +1,8 @@
 import starSense
+from lqr_utils import build_lqr_gain
 from attitude_plotting import (
     plot_quaternion_components,
     plot_euler_angles,
-    plot3d_orientation_animation,
     plot_rotational_kinetic_energy,
     plot_attitude_error_components,
     plot_attitude_error_norm,
@@ -12,12 +12,12 @@ from attitude_plotting import (
 
 # set up simulation parameters
 params = starSense.AttitudeSimParams()
-params.dt = 0.01
-params.numSteps = 3000
+params.dt = 0.001
+params.numSteps = 50000
 
 # spacecraft parameters
-params.q0 = [1.0, 0.2, 2.0, 5.0]
-params.w0 = [0.8, 1.3, 2.1] 
+params.q0 = [1.0, 0.05, -0.03, 0.02]  # small-ish attitude error
+params.w0 = [0.1, -0.05, 0.02]
 params.inertiaBody = [
     [1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
@@ -26,13 +26,17 @@ params.inertiaBody = [
 
 # constant reference profile
 params.referenceType = 'fixed'
-params.wRef = [0.0, 0.0, 0.0] 
 params.qRef = [1.0, 0.0, 0.0, 0.0]
+params.wRef = [0.0, 0.0, 0.0]
 
 # control parameters
-params.controllerType = 'pd'
-params.kpAtt  = [0.25, 0.25, 0.25]
-params.kdRate = [0.7,  0.7,  0.7]
+params.controllerType = 'lqr'
+q_wts = [0.2, 0.2, 0.2]   # attitude
+w_wts = [0.9, 0.9, 0.9]   # rate
+r_wts = [0.5, 0.5, 0.5]   # control effort
+
+K_lqr = build_lqr_gain(params.inertiaBody, q_wts, w_wts, r_wts)  # 3x6
+params.kLqr = K_lqr.tolist()
 params.controlRateHz = 1
 
 # run simulation
@@ -41,7 +45,6 @@ out = starSense.run_simulation(params)
 # rotation plots
 plot_quaternion_components(out)
 plot_euler_angles(out)
-plot3d_orientation_animation(out)
 
 # energy plots
 plot_rotational_kinetic_energy(out, params.inertiaBody)
