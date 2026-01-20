@@ -25,7 +25,13 @@ PYBIND11_MODULE(starSense, m) {
         .def_readwrite("qRef", &starSense::AttitudeSimParams::qRef)
         .def_readwrite("referenceType", &starSense::AttitudeSimParams::referenceType)
         .def_readwrite("sensorType", &starSense::AttitudeSimParams::sensorType)
-        .def_readwrite("actuatorType", &starSense::AttitudeSimParams::actuatorType);
+        .def_readwrite("actuatorType", &starSense::AttitudeSimParams::actuatorType)
+        // Reaction wheel parameters
+        .def_readwrite("wheelAxes", &starSense::AttitudeSimParams::wheelAxes)
+        .def_readwrite("wheelInertias", &starSense::AttitudeSimParams::wheelInertias)
+        .def_readwrite("maxWheelTorque", &starSense::AttitudeSimParams::maxWheelTorque)
+        .def_readwrite("maxWheelSpeed", &starSense::AttitudeSimParams::maxWheelSpeed)
+        .def_readwrite("wheelSpeeds0", &starSense::AttitudeSimParams::wheelSpeeds0);
 
     // Simulation Result
     py::class_<starSense::SimulationResult>(m, "SimulationResult")

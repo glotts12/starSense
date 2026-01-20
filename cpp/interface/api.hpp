@@ -50,7 +50,18 @@ struct AttitudeSimParams {
     std::string sensorType = "ideal";     // only "ideal" is supported right now
 
     // Actuator selection
-    std::string actuatorType = "ideal";   // only "ideal" is supported right now
+    std::string actuatorType = "ideal";   // "ideal" or "reactionWheel"
+
+    // Reaction wheel parameters (used when actuatorType = "reactionWheel")
+    std::vector<Vec3> wheelAxes = {       // spin axis for each wheel in body frame (normalized)
+        {1.0, 0.0, 0.0},
+        {0.0, 1.0, 0.0},
+        {0.0, 0.0, 1.0}
+    };
+    std::vector<double> wheelInertias = {0.01, 0.01, 0.01};   // kg·m² (spin axis MOI per wheel)
+    std::vector<double> maxWheelTorque = {0.1, 0.1, 0.1};     // N·m (torque saturation per wheel)
+    std::vector<double> maxWheelSpeed = {6000, 6000, 6000};   // RPM (speed saturation per wheel)
+    std::vector<double> wheelSpeeds0 = {0.0, 0.0, 0.0};       // RPM (initial wheel speeds)
 
     // Reference profile selection
     std::string referenceType = "fixed";  // only fixed is supported right now
