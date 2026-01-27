@@ -17,8 +17,8 @@ params.dt = 0.01
 params.numSteps = 5000
 
 # spacecraft parameters
-params.q0 = [1.0, 0.2, 2.0, 5.0]
-params.w0 = [0.8, 1.3, 2.1] 
+params.q0 = [1.0, 0.05, -0.03, 0.02]  # small-ish attitude error
+params.w0 = [0.1, -0.05, 0.02]
 params.inertiaBody = [
     [1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
@@ -36,13 +36,31 @@ params.kpAtt  = [0.25, 0.25, 0.25]
 params.kdRate = [0.7,  0.7,  0.7]
 params.controlRateHz = 1
 
+# actuator configuration
+params.actuatorType = 'reactionWheel'
+params.wheelAxes = [
+    [1.0, 0.0, 0.0],  # wheel 1 spin axis in body frame
+    [0.0, 1.0, 0.0],  # wheel 2
+    [0.0, 0.0, 1.0],  # wheel 3
+]
+
+# wheel properties (per wheel)
+params.wheelInertias = [0.01, 0.01, 0.01]  # kg·m² (spin axis MOI)
+
+# saturation limits
+params.maxWheelTorque = [0.1, 0.1, 0.1]      # N·m
+params.maxWheelSpeed  = [6000, 6000, 6000]   # RPM
+
+# initial wheel speeds
+params.wheelSpeeds0 = [0.0, 0.0, 0.0]  # RPM
+
 # run simulation
 out = starSense.run_simulation(params)
 
 # rotation plots
 plot_quaternion_components(out)
 plot_euler_angles(out)
-plot3d_orientation_animation(out)
+# plot3d_orientation_animation(out)
 
 # energy plots
 plot_rotational_kinetic_energy(out, params.inertiaBody)
