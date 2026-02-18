@@ -92,12 +92,20 @@ std::unique_ptr<Sensor> makeSensor(const std::string &sensorType) {
 }
 
 // Build actuator from params
-std::unique_ptr<Actuator> makeActuator(const std::string &actuatorType) {
-    if (actuatorType == "ideal") {
+std::unique_ptr<Actuator> makeActuator(const AttitudeSimParams &params) {
+    if (params.actuatorType == "ideal") {
         return std::make_unique<IdealTorqueActuator>();
+    } else if (params.actuatorType == "reactionWheel") {
+        return std::make_unique<ReactionWheelActuator>(
+            params.wheelAxes,
+            params.wheelInertias,
+            params.maxWheelTorque,
+            params.maxWheelSpeed,
+            params.wheelSpeeds0
+        );
     } else {
         throw std::invalid_argument(
-            "runSimulation: unsupported actuatorType = " + actuatorType
+            "runSimulation: unsupported actuatorType = " + params.actuatorType
         );
     }
 }
@@ -109,7 +117,7 @@ std::unique_ptr<ReferenceProfile> makeReferenceProfile(
     const Vec3& wRef
 ) {
     if (referenceType == "fixed") {
-        return std::make_unique<ConstantReferenceProfile>(qRef, wRef);
+        return std::make_unique<ConstantReferenceProfile>(qRef);
     } else {
         throw std::invalid_argument(
             "runSimulation: unsupported referenceType = " + referenceType
@@ -144,7 +152,7 @@ SimulationResult runSimulation(const AttitudeSimParams &params) {
     auto sensor = makeSensor(params.sensorType);
 
     // Build actuator
-    auto actuator = makeActuator(params.actuatorType);
+    auto actuator = makeActuator(params);
 
     // Reference: constant attitude equal to initial for now
     auto refProvider = makeReferenceProfile(params.referenceType, params.qRef, params.wRef);

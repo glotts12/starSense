@@ -12,8 +12,8 @@ from attitude_plotting import (
 
 # set up simulation parameters
 params = starSense.AttitudeSimParams()
-params.dt = 0.001
-params.numSteps = 50000
+params.dt = 0.01
+params.numSteps = 3000
 
 # spacecraft parameters
 params.q0 = [1.0, 0.05, -0.03, 0.02]  # small-ish attitude error
@@ -27,13 +27,17 @@ params.inertiaBody = [
 # constant reference profile
 params.referenceType = 'fixed'
 params.qRef = [1.0, 0.0, 0.0, 0.0]
-params.wRef = [0.0, 0.0, 0.0]
 
 # control parameters
 params.controllerType = 'lqr'
-q_wts = [0.2, 0.2, 0.2]   # attitude
-w_wts = [0.9, 0.9, 0.9]   # rate
-r_wts = [0.5, 0.5, 0.5]   # control effort
+# q_wts = [0.2, 0.2, 0.2]   # attitude
+# w_wts = [0.9, 0.9, 0.9]   # rate
+# r_wts = [0.5, 0.5, 0.5]   # control effort
+
+q_wts = [1/(0.017**2)] * 3
+w_wts = [1/(0.0017**2)] * 3
+r_wts = [1/(0.01**2)] * 3
+
 
 K_lqr = build_lqr_gain(params.inertiaBody, q_wts, w_wts, r_wts)  # 3x6
 params.kLqr = K_lqr.tolist()
@@ -44,7 +48,7 @@ out = starSense.run_simulation(params)
 
 # rotation plots
 plot_quaternion_components(out)
-plot_euler_angles(out)
+# plot_euler_angles(out)
 
 # energy plots
 plot_rotational_kinetic_energy(out, params.inertiaBody)

@@ -23,8 +23,7 @@ Current capabilities:
 
 - **Reference profiles**
   - Fixed reference attitude `qRef`
-  - Fixed reference angular rate `wRef`
-  - Earth-pointing, nadir-pointing, velocity-aligned, etc. coming soon ...
+  - Spinning, Earth-pointing, nadir-pointing, velocity-aligned, etc. coming soon ...
 
 - **Controllers**
   - **Zero controller**
