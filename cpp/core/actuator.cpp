@@ -70,7 +70,7 @@ Vec3 ReactionWheelActuator::applyCommand(
         const Vec3& axis = wheelAxes_[i];
 
         // Project commanded torque onto this wheel's axis
-        double cmdTorqueWheel = -(command[0]*axis[0] + command[1]*axis[1] + command[2]*axis[2]);
+        double cmdTorqueWheel = (command[0]*axis[0] + command[1]*axis[1] + command[2]*axis[2]);
 
         // Apply torque saturation
         double saturatedTorque = std::clamp(cmdTorqueWheel, -maxTorque_[i], maxTorque_[i]);

@@ -19,16 +19,15 @@ public:
 
 class ConstantReferenceProfile : public ReferenceProfile {
 public:
-    ConstantReferenceProfile(const Quat& qRef0, const Vec3& wRef0)
-        : qRef0_(qRef0), wRef0_(wRef0) {}
+    explicit ConstantReferenceProfile(const Quat& qRef0)
+        : qRef0_(qRef0) {}
 
     ReferenceState computeReferenceState(double /*t*/) const override {
-        return ReferenceState{qRef0_, wRef0_};
+        return ReferenceState{qRef0_, Vec3{0.0, 0.0, 0.0}};
     }
 
 private:
     const Quat qRef0_;
-    const Vec3 wRef0_;
 };
 
 } // namespace starSense

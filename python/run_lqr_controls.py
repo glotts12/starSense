@@ -27,7 +27,6 @@ params.inertiaBody = [
 # constant reference profile
 params.referenceType = 'fixed'
 params.qRef = [1.0, 0.0, 0.0, 0.0]
-params.wRef = [0.0, 0.0, 0.0]
 
 # control parameters
 params.controllerType = 'lqr'

@@ -38,12 +38,12 @@ SimulationResult AttitudeSimulation::run(
 
     // torqueFunc: sensor -> controller -> actuator -> tau_body
     auto torqueFunc = [this, &result](double t, const AttitudeState &x) -> Vec3 {
-        // 1. sensor measurement (for now: ideal attitude sensor)
+        // 1. sensor measurement 
         Quat qMeas = sensor_->measureAttitude(t, x);
 
         // estimated state = true state but with measured attitude
         AttitudeState estimatedState = x;
-        estimatedState.q = qMeas;  // QUESTION: (for later) Why are we not measuring omega too?
+        estimatedState.q = qMeas; 
 
         // 2. reference state (desired attitude / rate at time t)
         ReferenceState ref = referenceProfile_->computeReferenceState(t);

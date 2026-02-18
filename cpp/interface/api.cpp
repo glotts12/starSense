@@ -117,7 +117,7 @@ std::unique_ptr<ReferenceProfile> makeReferenceProfile(
     const Vec3& wRef
 ) {
     if (referenceType == "fixed") {
-        return std::make_unique<ConstantReferenceProfile>(qRef, wRef);
+        return std::make_unique<ConstantReferenceProfile>(qRef);
     } else {
         throw std::invalid_argument(
             "runSimulation: unsupported referenceType = " + referenceType
