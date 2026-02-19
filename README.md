@@ -23,7 +23,8 @@ Current capabilities:
 
 - **Reference profiles**
   - Fixed reference attitude `qRef`
-  - Spinning, Earth-pointing, nadir-pointing, velocity-aligned, etc. coming soon ...
+  - Spinning reference attitude `wRef`
+  - Earth-pointing, nadir-pointing, velocity-aligned, etc. coming soon ...
 
 - **Controllers**
   - **Zero controller**
@@ -41,6 +42,7 @@ Current capabilities:
 - **Sensors & actuators**
   - Ideal attitude “sensor” (no noise or bias yet)
   - Ideal actuator (commanded torque = applied torque)
+  - Reaction wheels
   - Sensor/Actuator + Noise and uncertainty coming soon ...
 
 - **Space environment modeling**
@@ -152,11 +154,15 @@ PYTHONPATH=build python python/run_lqr_controls.py
 - `qRef`, `wRef` – reference attitude and rate histories
 - `attitudeError` – attitude error vector in the body frame
 - `rateError` – angular rate error in the body frame
+- `commandedTorque` - commanded torque in the body frame
+- `appliedTorque` - applied torque in the body frame
 
 The module `python/attitude_plotting.py` provides Plotly utilities for:
 
 - Quaternion time histories
 - Euler angles time histories (roll, pitch, yaw)
+- Angular velocity time histories
 - 3D attitude animation
 - Rotational kinetic energy vs time
 - Attitude and rate error vs time
+- Commanded and applied torque vs time
