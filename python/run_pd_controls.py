@@ -3,12 +3,13 @@ from lqr_utils import build_lqr_gain
 from attitude_plotting import (
     plot_quaternion_components,
     plot_euler_angles,
-    plot3d_orientation_animation,
+    plot_angular_velocity,
     plot_rotational_kinetic_energy,
     plot_attitude_error_components,
     plot_attitude_error_norm,
     plot_rate_error_components,
     plot_rate_error_norm,
+    plot_torque,
 )
 
 # set up simulation parameters
@@ -17,17 +18,17 @@ params.dt = 0.01
 params.numSteps = 45000
 
 # spacecraft parameters
-params.q0 = [1.0, 0.05, -0.03, 0.02]  # small-ish attitude error
-params.w0 = [0.1, -1.05, 1.02]
+params.q0 = [1.0, 0, 0, 0]  # small-ish attitude error
+params.w0 = [1.3, 2, 3.1]
 params.inertiaBody = [
     [1.0, 0.0, 0.0],
     [0.0, 1.0, 0.0],
     [0.0, 0.0, 1.0], 
 ]
 
-# constant reference profile
-params.referenceType = 'fixed'
-params.qRef = [1.0, 0.0, 0.0, 0.0]
+# spinnig reference profile
+params.referenceType = 'spinning'
+params.wRef = [1.0, 0.0, 0.0]
 
 # control parameters
 params.controllerType = 'pd'
@@ -47,7 +48,7 @@ params.wheelAxes = [
 params.wheelInertias = [0.01, 0.01, 0.01]  # kg·m² (spin axis MOI)
 
 # saturation limits
-params.maxWheelTorque = [0.01, 0.01, 0.01]      # N·m
+params.maxWheelTorque = [0.1, 0.1, 0.1]      # N·m
 params.maxWheelSpeed  = [6000, 6000, 6000]   # RPM
 
 # initial wheel speeds
@@ -59,7 +60,9 @@ out = starSense.run_simulation(params)
 # rotation plots
 plot_quaternion_components(out)
 plot_euler_angles(out)
-# plot3d_orientation_animation(out)
+
+# angular velocity
+plot_angular_velocity(out)
 
 # energy plot
 plot_rotational_kinetic_energy(out, params.inertiaBody)
@@ -69,3 +72,4 @@ plot_attitude_error_components(out)
 plot_attitude_error_norm(out)
 plot_rate_error_components(out)
 plot_rate_error_norm(out)
+plot_torque(out)

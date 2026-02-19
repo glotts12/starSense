@@ -8,6 +8,7 @@ from attitude_plotting import (
     plot_attitude_error_norm,
     plot_rate_error_components,
     plot_rate_error_norm,
+    plot_torque,
 )
 
 # set up simulation parameters
@@ -30,14 +31,9 @@ params.qRef = [1.0, 0.0, 0.0, 0.0]
 
 # control parameters
 params.controllerType = 'lqr'
-# q_wts = [0.2, 0.2, 0.2]   # attitude
-# w_wts = [0.9, 0.9, 0.9]   # rate
-# r_wts = [0.5, 0.5, 0.5]   # control effort
-
-q_wts = [1/(0.017**2)] * 3
-w_wts = [1/(0.0017**2)] * 3
-r_wts = [1/(0.01**2)] * 3
-
+q_wts = [0.2, 0.2, 0.2]   # attitude
+w_wts = [0.9, 0.9, 0.9]   # rate
+r_wts = [0.5, 0.5, 0.5]   # control effort
 
 K_lqr = build_lqr_gain(params.inertiaBody, q_wts, w_wts, r_wts)  # 3x6
 params.kLqr = K_lqr.tolist()
@@ -48,7 +44,7 @@ out = starSense.run_simulation(params)
 
 # rotation plots
 plot_quaternion_components(out)
-# plot_euler_angles(out)
+plot_euler_angles(out)
 
 # energy plots
 plot_rotational_kinetic_energy(out, params.inertiaBody)
@@ -58,3 +54,4 @@ plot_attitude_error_components(out)
 plot_attitude_error_norm(out)
 plot_rate_error_components(out)
 plot_rate_error_norm(out)
+plot_torque(out)
