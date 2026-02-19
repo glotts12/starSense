@@ -118,6 +118,8 @@ std::unique_ptr<ReferenceProfile> makeReferenceProfile(
 ) {
     if (referenceType == "fixed") {
         return std::make_unique<ConstantReferenceProfile>(qRef);
+    } else if (referenceType == "spinning") {
+        return std::make_unique<SpinningReferenceProfile>(wRef);
     } else {
         throw std::invalid_argument(
             "runSimulation: unsupported referenceType = " + referenceType

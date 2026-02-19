@@ -46,7 +46,7 @@ SimulationResult AttitudeSimulation::run(
         estimatedState.q = qMeas; 
 
         // 2. reference state (desired attitude / rate at time t)
-        ReferenceState ref = referenceProfile_->computeReferenceState(t);
+        ReferenceState ref = referenceProfile_->computeReferenceState(t, estimatedState);
 
         // 3. controller: compute commanded torque in body frame
         Vec3 commanded = controller_->computeCommandTorque(t, estimatedState, ref);
@@ -83,7 +83,7 @@ SimulationResult AttitudeSimulation::run(
         result.omegas.push_back(xk.w);
 
         // reference at this grid time
-        ReferenceState ref = referenceProfile_->computeReferenceState(tk);
+        ReferenceState ref = referenceProfile_->computeReferenceState(tk, AttitudeState{xk.q, xk.w});
         result.qRef.push_back(ref.qRef);
         result.wRef.push_back(ref.wRef);
 

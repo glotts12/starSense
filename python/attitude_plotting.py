@@ -5,481 +5,217 @@ import plotly.graph_objects as go
 from scipy.spatial.transform import Rotation as R
 
 
-# ---------------------------- #
-#   Common styling helper
-# ---------------------------- #
-def _apply_common_style(fig, title_text, x_title, y_title=None):
-    """Apply unified dark neon aesthetic for 2D plots."""
+# ------------------------------------------------
+# Common constants
+# ------------------------------------------------
+_FONT = "Courier New, monospace"
+_BG = "rgba(10,10,15,1)"
+_PAPER_BG = "rgba(0,0,0,1)"
+_GRID = "rgba(255,255,255,0.1)"
+
+# Consistent axis colors: x=red, y=green, z=blue
+_XYZ_COLORS = ["#FF5555", "#55FF55", "#5599FF"]
+
+# Quaternion colors: w=cyan, x=red, y=green, z=blue
+_QUAT_COLORS = ["#00FFFF", "#FF5555", "#55FF55", "#5599FF"]
+
+# Single-trace accent color
+_ACCENT = "#00FFCC"
+
+
+# ------------------------------------------------
+# Common styling helper
+# ------------------------------------------------
+def _apply_style(fig, title, x_label, y_label):
     fig.update_layout(
         title=dict(
-            text=title_text,
-            font=dict(family="Courier New, monospace", size=24, color="#FFFFFF"),
+            text=title,
+            font=dict(family=_FONT, size=22, color="#FFFFFF"),
             x=0.5,
         ),
         xaxis=dict(
-            title=dict(
-                text=x_title,
-                font=dict(family="Courier New, monospace", size=16, color="#FFFFFF"),
-            ),
-            gridcolor="rgba(255,255,255,0.1)",
+            title=dict(text=x_label, font=dict(family=_FONT, size=14, color="#FFFFFF")),
+            gridcolor=_GRID,
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title=dict(text=y_label, font=dict(family=_FONT, size=14, color="#FFFFFF")),
+            gridcolor=_GRID,
             zeroline=False,
         ),
         template="plotly_dark",
-        font=dict(family="Courier New, monospace", size=14, color="#FFFFFF"),
+        font=dict(family=_FONT, size=13, color="#FFFFFF"),
         legend=dict(
-            x=1.02,
-            y=1.0,
-            xanchor="left",
-            yanchor="top",
-            bgcolor="rgba(0,0,0,0)",
-            borderwidth=0,
-            font=dict(family="Courier New, monospace", size=12, color="#FFFFFF"),
+            x=1.02, y=1.0, xanchor="left", yanchor="top",
+            bgcolor="rgba(0,0,0,0)", borderwidth=0,
+            font=dict(family=_FONT, size=12, color="#FFFFFF"),
         ),
         margin=dict(l=60, r=140, t=80, b=60),
-        height=550,
-        plot_bgcolor="rgba(10,10,15,1)",
-        paper_bgcolor="rgba(0,0,0,1)",
+        height=500,
+        plot_bgcolor=_BG,
+        paper_bgcolor=_PAPER_BG,
     )
-
-    # Only set y-axis title for 2D plots
-    if y_title is not None and "yaxis" in fig.layout:
-        fig.update_yaxes(
-            title=dict(
-                text=y_title,
-                font=dict(family="Courier New, monospace", size=16, color="#FFFFFF"),
-            ),
-            gridcolor="rgba(255,255,255,0.1)",
-            zeroline=False,
-        )
-
     return fig
 
 
-# ---------------------------- #
-#   1. Quaternion components
-# ---------------------------- #
+def _add_xyz_traces(fig, t, data, labels, colors=_XYZ_COLORS):
+    for i in range(3):
+        fig.add_trace(go.Scatter(
+            x=t, y=data[:, i], mode="lines",
+            name=labels[i], line=dict(width=2.5, color=colors[i]),
+        ))
+    return fig
+
+
+def _add_single_trace(fig, t, y, name, color=_ACCENT):
+    fig.add_trace(go.Scatter(
+        x=t, y=y, mode="lines",
+        name=name, line=dict(width=2.5, color=color),
+    ))
+    return fig
+
+
+# ------------------------------------------------
+# Quaternion components
+# ------------------------------------------------
 def plot_quaternion_components(result):
-    """
-    Plot quaternion components vs time with neon styling.
-
-    Parameters
-    ----------
-    result : SimulationResult
-        Output from starSense.run_simulation
-        Must have result.time and result.quats (list of [w,x,y,z]).
-    """
     t = np.array(result.time)
-    quats = np.array(result.quats)  # shape (N, 4) as [w, x, y, z]
+    quats = np.array(result.quats)  # (N, 4) as [w, x, y, z]
 
-    w = quats[:, 0]
-    x = quats[:, 1]
-    y = quats[:, 2]
-    z = quats[:, 3]
-
-    colors = ["#00FFFF", "#00FF88", "#FF00FF", "#FF8800"]
-    labels = ["w 🌀", "x ⚡", "y 💫", "z 🌌"]
-    data = [w, x, y, z]
-
+    labels = ["w", "x", "y", "z"]
     fig = go.Figure()
-    for d, label, color in zip(data, labels, colors):
-        fig.add_trace(
-            go.Scatter(
-                x=t,
-                y=d,
-                mode="lines",
-                name=f"<b>{label}</b>",
-                line=dict(width=3, color=color),
-            )
-        )
+    for i in range(4):
+        fig.add_trace(go.Scatter(
+            x=t, y=quats[:, i], mode="lines",
+            name=labels[i], line=dict(width=2.5, color=_QUAT_COLORS[i]),
+        ))
 
-    fig = _apply_common_style(
-        fig,
-        "🧭 Quaternion Time Evolution",
-        "⏱️ Time [s]",
-        "Component Value 🧮",
-    )
+    _apply_style(fig, "Quaternion Components", "Time [s]", "Component Value")
     fig.show()
 
 
-# ---------------------------- #
-#   2. Euler Angle Evolution
-# ---------------------------- #
+# ------------------------------------------------
+# Euler angles
+# ------------------------------------------------
 def plot_euler_angles(result):
-    """
-    Plot roll, pitch, yaw evolution from quaternion trajectory.
-
-    Parameters
-    ----------
-    result : SimulationResult
-        Output from starSense.run_simulation
-        Must have result.time and result.quats (list of [w,x,y,z]).
-    """
     t = np.array(result.time)
-    quats = np.array(result.quats)  # [w, x, y, z]
+    quats = np.array(result.quats)
 
-    # Convert to [x, y, z, w] for scipy
     quats_xyzw = np.stack([quats[:, 1], quats[:, 2], quats[:, 3], quats[:, 0]], axis=1)
     euler = R.from_quat(quats_xyzw).as_euler("xyz", degrees=True)
 
-    labels = ["Roll [°] 🔴", "Pitch [°] 🟢", "Yaw [°] 🔵"]
-    colors = ["#FF5555", "#55FF55", "#5599FF"]
+    fig = go.Figure()
+    _add_xyz_traces(fig, t, euler, ["Roll", "Pitch", "Yaw"])
+    _apply_style(fig, "Euler Angles", "Time [s]", "Angle [deg]")
+    fig.show()
+
+
+# ------------------------------------------------
+# Angular velocity
+# ------------------------------------------------
+def plot_angular_velocity(result):
+    t = np.array(result.time)
+    omegas = np.array(result.omegas)
 
     fig = go.Figure()
-    for i in range(3):
-        fig.add_trace(
-            go.Scatter(
-                x=t,
-                y=euler[:, i],
-                mode="lines",
-                name=f"<b>{labels[i]}</b>",
-                line=dict(width=3, color=colors[i]),
-            )
-        )
-
-    fig = _apply_common_style(
-        fig,
-        "🪩 Euler Angle Evolution",
-        "⏱️ Time [s]",
-        "Angle [deg] ⚙️",
-    )
+    _add_xyz_traces(fig, t, omegas, ["wx", "wy", "wz"])
+    _apply_style(fig, "Angular Velocity", "Time [s]", "Angular Velocity [rad/s]")
     fig.show()
 
 
-# ---------------------------- #
-#   3. 3D Quaternion Animation
-# ---------------------------- #
-def plot3d_orientation_animation(result):
-    """
-    Animated 3D visualization of body axes orientation vs time.
-
-    Parameters
-    ----------
-    result : SimulationResult
-        Output from starSense.run_simulation
-        Must have result.time and result.quats (list of [w,x,y,z]).
-    """
-    t = np.array(result.time)
-    quats = np.array(result.quats)  # [w, x, y, z]
-
-    quats_xyzw = np.stack([quats[:, 1], quats[:, 2], quats[:, 3], quats[:, 0]], axis=1)
-    rotations = R.from_quat(quats_xyzw)
-    rot_mats = rotations.as_matrix()  # shape (N, 3, 3)
-
-    axis_length = 1.0
-    body_x = np.array([axis_length, 0.0, 0.0])
-    body_y = np.array([0.0, axis_length, 0.0])
-    body_z = np.array([0.0, 0.0, axis_length])
-
-    frames = []
-    for i in range(len(rot_mats)):
-        R_i = rot_mats[i]
-        origin = np.array([0.0, 0.0, 0.0])
-        x_vec = R_i @ body_x
-        y_vec = R_i @ body_y
-        z_vec = R_i @ body_z
-
-        frames.append(
-            go.Frame(
-                data=[
-                    go.Scatter3d(
-                        x=[origin[0], x_vec[0]],
-                        y=[origin[1], x_vec[1]],
-                        z=[origin[2], x_vec[2]],
-                        mode="lines+markers",
-                        line=dict(color="#FF5555", width=6),
-                        name="X-axis",
-                        showlegend=False,
-                    ),
-                    go.Scatter3d(
-                        x=[origin[0], y_vec[0]],
-                        y=[origin[1], y_vec[1]],
-                        z=[origin[2], y_vec[2]],
-                        mode="lines+markers",
-                        line=dict(color="#55FF55", width=6),
-                        name="Y-axis",
-                        showlegend=False,
-                    ),
-                    go.Scatter3d(
-                        x=[origin[0], z_vec[0]],
-                        y=[origin[1], z_vec[1]],
-                        z=[origin[2], z_vec[2]],
-                        mode="lines+markers",
-                        line=dict(color="#5599FF", width=6),
-                        name="Z-axis",
-                        showlegend=False,
-                    ),
-                ],
-                name=f"t={t[i]:.2f}s",
-            )
-        )
-
-    # Initial frame
-    fig = go.Figure(data=frames[0].data)
-
-    fig.update_layout(
-        title=dict(
-            text="🌀 3D Quaternion Orientation Animation",
-            font=dict(family="Courier New, monospace", size=24, color="#00FFCC"),
-            x=0.5,
-        ),
-        margin=dict(l=0, r=0, b=0, t=60),
-        scene=dict(
-            xaxis=dict(title="X", range=[-1.5, 1.5], gridcolor="rgba(255,255,255,0.1)"),
-            yaxis=dict(title="Y", range=[-1.5, 1.5], gridcolor="rgba(255,255,255,0.1)"),
-            zaxis=dict(title="Z", range=[-1.5, 1.5], gridcolor="rgba(255,255,255,0.1)"),
-            aspectmode="cube",
-            bgcolor="rgba(10,10,15,1)",
-        ),
-        template="plotly_dark",
-        font=dict(family="Courier New, monospace", size=14, color="#FFFFFF"),
-        paper_bgcolor="rgba(0,0,0,1)",
-        updatemenus=[
-            dict(
-                type="buttons",
-                buttons=[
-                    dict(
-                        label="▶️ Play",
-                        method="animate",
-                        args=[
-                            None,
-                            {
-                                "frame": {"duration": 50, "redraw": True},
-                                "fromcurrent": True,
-                                "transition": {"duration": 0},
-                            },
-                        ],
-                    ),
-                    dict(
-                        label="⏸️ Pause",
-                        method="animate",
-                        args=[
-                            [None],
-                            {
-                                "mode": "immediate",
-                                "frame": {"duration": 0, "redraw": False},
-                                "transition": {"duration": 0},
-                            },
-                        ],
-                    ),
-                ],
-                direction="left",
-                pad={"r": 10, "t": 10},
-                showactive=False,
-                x=0.1,
-                xanchor="left",
-                y=1.1,
-                yanchor="top",
-            )
-        ],
-        sliders=[
-            dict(
-                steps=[
-                    dict(
-                        method="animate",
-                        args=[
-                            [f.name],
-                            {
-                                "mode": "immediate",
-                                "frame": {"duration": 0, "redraw": True},
-                                "transition": {"duration": 0},
-                            },
-                        ],
-                        label=f"t={t[i]:.2f}s",
-                    )
-                    for i, f in enumerate(frames)
-                ],
-                active=0,
-                x=0.1,
-                y=0.0,
-                xanchor="left",
-                yanchor="top",
-                len=0.8,
-                font=dict(family="Courier New, monospace", size=12, color="#FFFFFF"),
-                bgcolor="rgba(0,0,0,0)",
-            )
-        ],
-    )
-
-    fig.frames = frames
-    fig.show()
-
-
-# ---------------------------- #
-#   4. Rotational Kinetic Energy
-# ---------------------------- #
+# ------------------------------------------------
+# Rotational kinetic energy
+# ------------------------------------------------
 def plot_rotational_kinetic_energy(result, inertia_body):
-    """
-    Plot rotational kinetic energy T = 0.5 * ωᵀ J ω over time.
-
-    Parameters
-    ----------
-    result : SimulationResult
-        Output from starSense.run_simulation.
-        Must have result.time and result.omegas (list of [wx, wy, wz]).
-
-    inertia_body : array-like, shape (3, 3)
-        Inertia matrix in the body frame (same J used in the dynamics).
-    """
     t = np.array(result.time)
-    omegas = np.array(result.omegas)          # shape (N, 3)
+    omegas = np.array(result.omegas)
     J = np.array(inertia_body, dtype=float).reshape(3, 3)
 
-    # Rotational kinetic energy: T = 0.5 * ωᵀ J ω
-    J_omega = omegas @ J.T                    # (N, 3)
+    J_omega = omegas @ J.T
     T = 0.5 * np.sum(omegas * J_omega, axis=1)
 
     fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=t,
-            y=T,
-            mode="lines",
-            name="<b>Rotational KE ⚡</b>",
-            line=dict(width=3, color="#00FFFF"),
-        )
-    )
-
-    fig = _apply_common_style(
-        fig,
-        "⚡ Rotational Kinetic Energy",
-        "⏱️ Time [s]",
-        "Energy [J] ⚡️",
-    )
+    _add_single_trace(fig, t, T, "Rotational KE")
+    _apply_style(fig, "Rotational Kinetic Energy", "Time [s]", "Energy [J]")
     fig.show()
 
 
-# ---------------------------------------------------------
-# Control error plots
-# ---------------------------------------------------------
+# ------------------------------------------------
+# Attitude error components
+# ------------------------------------------------
 def plot_attitude_error_components(result):
-    """
-    Plot attitude error components e_att(t) vs time.
-
-    e_att is the 3-vector rotation error (in radians) computed in C++.
-    """
     t = np.array(result.time)
-    e_att = np.array(result.attitudeError)  # shape (N+1, 3)
-
-    ex = e_att[:, 0]
-    ey = e_att[:, 1]
-    ez = e_att[:, 2]
-
-    labels = ["eₓ 😵‍💫", "eᵧ 🤯", "e_z 🌀"]
-    colors = ["#FF5555", "#55FF55", "#5599FF"]
-    data = [ex, ey, ez]
+    e_att = np.array(result.attitudeError)
 
     fig = go.Figure()
-    for d, label, color in zip(data, labels, colors):
-        fig.add_trace(
-            go.Scatter(
-                x=t,
-                y=d,
-                mode="lines",
-                name=f"<b>{label}</b>",
-                line=dict(width=3, color=color),
-            )
-        )
-
-    fig = _apply_common_style(
-        fig,
-        "🎯 Attitude Error Components",
-        "⏱️ Time [s]",
-        "Error [rad] 🧮",
-    )
+    _add_xyz_traces(fig, t, e_att, ["e_x", "e_y", "e_z"])
+    _apply_style(fig, "Attitude Error Components", "Time [s]", "Error [rad]")
     fig.show()
 
 
+# ------------------------------------------------
+# Attitude error norm
+# ------------------------------------------------
 def plot_attitude_error_norm(result):
-    """
-    Plot norm of attitude error vs time.
-
-    Norm of e_att is the small-angle approximation of total rotation error.
-    Converted to degrees for sanity.
-    """
     t = np.array(result.time)
-    e_att = np.array(result.attitudeError)  # (N+1, 3)
-    e_norm_rad = np.linalg.norm(e_att, axis=1)
-    e_norm_deg = np.rad2deg(e_norm_rad)
+    e_att = np.array(result.attitudeError)
+    e_norm_deg = np.rad2deg(np.linalg.norm(e_att, axis=1))
 
     fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=t,
-            y=e_norm_deg,
-            mode="lines",
-            name="<b>‖e_att‖</b>",
-            line=dict(width=3, color="#FF00FF"),
-        )
-    )
-
-    fig = _apply_common_style(
-        fig,
-        "🎯 Attitude Error Norm",
-        "⏱️ Time [s]",
-        "‖e_att‖ [deg] 📐",
-    )
+    _add_single_trace(fig, t, e_norm_deg, "||e_att||")
+    _apply_style(fig, "Attitude Error Norm", "Time [s]", "||e_att|| [deg]")
     fig.show()
 
 
+# ------------------------------------------------
+# Rate error components
+# ------------------------------------------------
 def plot_rate_error_components(result):
-    """
-    Plot angular rate error components e_ω(t) = ω - ω_ref vs time.
-    """
     t = np.array(result.time)
-    e_rate = np.array(result.rateError)  # (N+1, 3)
-
-    ew_x = e_rate[:, 0]
-    ew_y = e_rate[:, 1]
-    ew_z = e_rate[:, 2]
-
-    labels = ["e_ωₓ 🔻", "e_ωᵧ 🔺", "e_ω_z 🔁"]
-    colors = ["#00FFFF", "#00FF88", "#FF8800"]
-    data = [ew_x, ew_y, ew_z]
+    e_rate = np.array(result.rateError)
 
     fig = go.Figure()
-    for d, label, color in zip(data, labels, colors):
-        fig.add_trace(
-            go.Scatter(
-                x=t,
-                y=d,
-                mode="lines",
-                name=f"<b>{label}</b>",
-                line=dict(width=3, color=color),
-            )
-        )
-
-    fig = _apply_common_style(
-        fig,
-        "⚙️ Rate Error Components",
-        "⏱️ Time [s]",
-        "e_ω [rad/s] 🧮",
-    )
+    _add_xyz_traces(fig, t, e_rate, ["e_wx", "e_wy", "e_wz"])
+    _apply_style(fig, "Rate Error Components", "Time [s]", "Rate Error [rad/s]")
     fig.show()
 
 
+# ------------------------------------------------
+# Rate error norm
+# ------------------------------------------------
 def plot_rate_error_norm(result):
-    """
-    Plot norm of angular rate error vs time.
-    """
     t = np.array(result.time)
-    e_rate = np.array(result.rateError)  # (N+1, 3)
+    e_rate = np.array(result.rateError)
     e_norm = np.linalg.norm(e_rate, axis=1)
 
     fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=t,
-            y=e_norm,
-            mode="lines",
-            name="<b>‖e_ω‖</b>",
-            line=dict(width=3, color="#00FFCC"),
-        )
-    )
+    _add_single_trace(fig, t, e_norm, "||e_w||")
+    _apply_style(fig, "Rate Error Norm", "Time [s]", "||e_w|| [rad/s]")
+    fig.show()
 
-    fig = _apply_common_style(
-        fig,
-        "⚙️ Rate Error Norm",
-        "⏱️ Time [s]",
-        "‖e_ω‖ [rad/s] 📉",
-    )
+
+# ------------------------------------------------
+# Commanded vs. applied torque
+# ------------------------------------------------
+def plot_torque(result):
+    # Torque vectors are size N; time is size N+1
+    t = np.array(result.time[:-1])
+    tau_cmd = np.array(result.commandedTorque)
+    tau_app = np.array(result.appliedTorque)
+
+    axis_labels = ["x", "y", "z"]
+    fig = go.Figure()
+    for i in range(3):
+        fig.add_trace(go.Scatter(
+            x=t, y=tau_cmd[:, i], mode="lines",
+            name=f"cmd {axis_labels[i]}",
+            line=dict(width=2, color=_XYZ_COLORS[i], dash="dash"),
+        ))
+        fig.add_trace(go.Scatter(
+            x=t, y=tau_app[:, i], mode="lines",
+            name=f"app {axis_labels[i]}",
+            line=dict(width=2.5, color=_XYZ_COLORS[i]),
+        ))
+
+    _apply_style(fig, "Commanded vs. Applied Torque", "Time [s]", "Torque [N·m]")
     fig.show()
